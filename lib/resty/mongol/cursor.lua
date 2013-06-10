@@ -72,7 +72,7 @@ function cursor_methods:skip(n)
             self.id = false
         end
     end
-    return self:next ( )
+    return self:skip (n)
 end
 
 function cursor_methods:sort(field, size)
