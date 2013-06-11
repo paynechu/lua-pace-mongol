@@ -277,4 +277,9 @@ function colmethods:find_one(query, returnfields)
     return nil
 end
 
+function colmethods:find_skip(query, n, m, returnfields)
+    local id, results, t = self:query(query, returnfields, 0, n)
+    id, results, t  = self:getmore(id, m, 0)
+    return results
+end
 return colmt
