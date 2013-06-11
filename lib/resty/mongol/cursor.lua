@@ -59,13 +59,13 @@ function cursor_methods:skip(n)
     local t
     if not self.id then
         self.id, self.results, t = self.col:query(self.query, 
-                        self.returnfields, self.i, self.num_each)
+                        self.returnfields, 0,self.i)
         if self.id == "\0\0\0\0\0\0\0\0" then
             self.done = true
         end
     else
         self.id, self.results, t = self.col:getmore(self.id, 
-                        self.num_each, self.i)
+                        self.num_each, 0)
         if self.id == "\0\0\0\0\0\0\0\0" then
             self.done = true
         elseif t.CursorNotFound then
