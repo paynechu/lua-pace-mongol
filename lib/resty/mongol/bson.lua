@@ -23,6 +23,7 @@ local getlib = require ( mod_name .. ".get" )
 local read_terminated_string = getlib.read_terminated_string
 
 local obid = require ( mod_name .. ".object_id" )
+local nbson = require ( mod_name .. ".bson-lua.bson" )
 local new_object_id = obid.new
 local object_id_mt = obid.metatable
 local binary_mt = {}
@@ -119,93 +120,8 @@ local function from_bson ( get )
 end
 
 local to_bson
-local function pack ( k , v )
-	local ot = type ( v )
-	local mt = getmetatable ( v )
-
-	if ot == "number" then
-		return "\1" .. k .. "\0" .. to_double ( v )
-	elseif ot == "nil" then
-		return "\10" .. k .. "\0"
-	elseif ot == "string" then
-		return "\2" .. k .. "\0" .. num_to_le_uint ( #v + 1 ) .. v .. "\0"
-	elseif ot == "boolean" then
-		if v == false then
-			return "\8" .. k .. "\0\0"
-		else
-			return "\8" .. k .. "\0\1"
-		end
-	elseif mt == object_id_mt then
-		return "\7" .. k .. "\0" .. v.id
-	elseif mt == utc_date then
-		return "\9" .. k .. "\0" .. num_to_le_int(v.v, 8)
-	elseif mt == binary_mt then
-		return "\5" .. k .. "\0" .. num_to_le_uint(string.len(v.v)) .. 
-               v.st .. v.v
-	elseif ot == "table" then
-		local doc , array = to_bson(v)
-		if array then
-			return "\4" .. k .. "\0" .. doc
-		else
-			return "\3" .. k .. "\0" .. doc
-		end
-	else
-		error ( "Failure converting " .. ot ..": " .. tostring ( v ) )
-	end
-end
-
 function to_bson(ob)
-	-- Find out if ob if an array; string->value map; or general table
-	local onlyarray = true
-	local seen_n , high_n = { } , 0
-	local onlystring = true
-	for k , v in pairs ( ob ) do
-		local t_k = type ( k )
-		onlystring = onlystring and ( t_k == "string" )
-		if onlyarray then
-			if t_k == "number" and k >= 0 then
-				if k >= high_n then
-					high_n = k
-					seen_n [ k ] = v
-				end
-			else
-				onlyarray = false
-			end
-		end
-		if not onlyarray and not onlystring then break end
-	end
-
-	local retarray , m = false
-	if onlystring then -- Do string first so the case of an empty table is done properly
-		local r = { }
-        for k , v in pairs ( ob ) do
---ngx.log(ngx.ERR,"="..k..i)
-            t_insert ( r , pack ( k , v ) )
-        end
-		m = t_concat ( r )
-	elseif onlyarray then
-		local r = { }
-
-		local low = 0
-		--if seen_n [ 0 ] then low = 0 end
-		for i=low , high_n do
-			r [ i ] = pack ( i , seen_n [ i ] )
-		end
-
-		m = t_concat ( r , "" , low , high_n )
-		retarray = true
-	else
-		local ni = 1
-		local keys , vals = { } , { }
-		for k , v in pairs ( ob ) do
-			keys [ ni ] = k
-			vals [ ni ] = v
-			ni = ni + 1
-		end
-		return to_bson ( { _keys = keys , _vals = vals } )
-	end
-
-	return num_to_le_uint ( #m + 4 + 1 ) .. m .. "\0" , retarray
+	return nbson.encode(ob)
 end
 
 return {
