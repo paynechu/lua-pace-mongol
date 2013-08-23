@@ -43,6 +43,37 @@ end
 
 --todo
 --function cursor_methods:skip(n)
+function cursor_methods:skip(n)
+    assert(n)
+    if self.limit_n > 0 and self.i >= self.limit_n then return nil end
+
+    local v = self.results [ self.i + n ]
+    if v ~= nil then
+        self.i = self.i + n
+        self.results [ self.i ] = nil
+        return self.i , v
+    end
+
+    if self.done then return nil end
+
+    local t
+    if not self.id then
+        self.id, self.results, t = self.col:query(self.query, 
+                        self.returnfields, 0,self.i)
+        if self.id == "\0\0\0\0\0\0\0\0" then
+            self.done = true
+        end
+    else
+        self.id, self.results, t = self.col:getmore(self.id, 
+                        self.num_each, 0)
+        if self.id == "\0\0\0\0\0\0\0\0" then
+            self.done = true
+        elseif t.CursorNotFound then
+            self.id = false
+        end
+    end
+    return self:skip (n)
+end
 
 function cursor_methods:sort(field, size)
     size = size or 10000
