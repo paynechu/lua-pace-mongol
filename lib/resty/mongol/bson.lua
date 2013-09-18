@@ -133,6 +133,8 @@ local function pack ( k , v )
    		end
 	elseif ot == "nil" then
 		return "\10" .. k .. "\0"
+	elseif ot == "userdata" then
+		return "\10" .. k .. "\0"
 	elseif ot == "string" then
 		return "\2" .. k .. "\0" .. num_to_le_uint ( #v + 1 ) .. v .. "\0"
 	elseif ot == "boolean" then
