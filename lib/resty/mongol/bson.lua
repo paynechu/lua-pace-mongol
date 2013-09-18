@@ -152,6 +152,9 @@ local function pack ( k , v )
                v.st .. v.v
 	elseif ot == "table" then
 		local doc , array = to_bson(v)
+		if string.byte(doc) == 5 then
+			return "\4" .. k .. "\0" .. doc
+		end
 		if array then
 			return "\4" .. k .. "\0" .. doc
 		else
