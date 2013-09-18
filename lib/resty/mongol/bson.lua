@@ -124,7 +124,13 @@ local function pack ( k , v )
 	local mt = getmetatable ( v )
 
 	if ot == "number" then
-		return "\1" .. k .. "\0" .. to_double ( v )
+		if math.floor(v) ~= v then
+      		return "\1" .. k .. "\0" .. to_double ( v )
+   		elseif v > 2147483647 or v < -2147483648 then -- 64bit
+      		return "\18" .. k .. "\0" .. num_to_le_int ( v , 8 )
+  		 else -- 32bit
+      		return "\16" .. k .. "\0" .. num_to_le_int ( v , 4 )
+   		end
 	elseif ot == "nil" then
 		return "\10" .. k .. "\0"
 	elseif ot == "string" then
