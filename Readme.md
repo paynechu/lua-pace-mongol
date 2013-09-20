@@ -234,8 +234,8 @@ Notes
 Known Issues
 ---------------------------
 1. Auth bson message has reduntant value.
-2. Could not inserting a null array, it always inserted as a document.
-3. Gridfs_new api only create a meta info in file_col.
+2. Gridfs_new api only create a meta info in file_col.
+
 
 Example
 ---------------------------
@@ -252,6 +252,51 @@ Example
 
             r = col:find_one({name="dog"})
             ngx.say(r["name"])
+			
+Example using query and order
+---------------------------
+            local mongo = require "resty.mongol"
+            conn = mongo:new()
+            conn:set_timeout(1000)
+            ok, err = conn:connect()
+            if not ok then
+                ngx.say("connect failed: "..err)
+            end
+
+            local db = conn:new_db_handle ( "test" )
+            col = db:get_col("test")
+			local sel = {}
+			sel = {name="dog"}
+			local field = {}
+			field['name'] = -1
+            id, results, t = col:query({query=sel,orderby=field},returnfields,0,10);
+            ngx.say(results[1]["name"])
+			
+Example query with regex and order
+---------------------------
+            local mongo = require "resty.mongol"
+            conn = mongo:new()
+            conn:set_timeout(1000)
+            ok, err = conn:connect()
+            if not ok then
+                ngx.say("connect failed: "..err)
+            end
+
+            local db = conn:new_db_handle ( "test" )
+            col = db:get_col("test")
+
+			local field = {}
+			field['name'] = -1
+			
+			local regex = {}
+			regex['$regex'] = 'do.*'
+			regex['$options'] = 'i'
+			
+			local sel = {}
+			sel = {name=regex}
+			
+            id, results, t = col:query({query=sel,orderby=field},returnfields,0,10);
+            ngx.say(results[1]["name"])
 
 For Test Case
 --------------------
