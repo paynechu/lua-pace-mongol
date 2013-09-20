@@ -168,13 +168,13 @@ end
 function to_bson(ob)
 	-- Find out if ob if an array; string->value map; or general table
 	local onlyarray = true
-	local seen_n , high_n = { } , 1
+	local seen_n , high_n = { } , 0
 	local onlystring = true
 	for k , v in pairs ( ob ) do
 		local t_k = type ( k )
 		onlystring = onlystring and ( t_k == "string" )
 		if onlyarray then
-			if t_k == "number" and k >= 1 then
+			if t_k == "number" and k >= 0 then
 				if k >= high_n then
 					high_n = k
 					seen_n [ k ] = v
@@ -190,7 +190,7 @@ function to_bson(ob)
 	if onlystring then -- Do string first so the case of an empty table is done properly
 		local r = { }
         for k , v in pairs ( ob ) do
---ngx.log(ngx.ERR,"="..k..i)
+
             t_insert ( r , pack ( k , v ) )
         end
 		m = t_concat ( r )
