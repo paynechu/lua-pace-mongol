@@ -237,7 +237,7 @@ Known Issues
 2. Gridfs_new api only create a meta info in file_col.
 
 
-Example
+Basic Usage
 ---------------------------
             local mongo = require "resty.mongol"
             conn = mongo:new()
@@ -253,89 +253,10 @@ Example
             r = col:find_one({name="dog"})
             ngx.say(r["name"])
 			
-Example using query and order
----------------------------
-            local mongo = require "resty.mongol"
-            conn = mongo:new()
-            conn:set_timeout(1000)
-            ok, err = conn:connect()
-            if not ok then
-                ngx.say("connect failed: "..err)
-            end
 
-            local db = conn:new_db_handle ( "test" )
-            col = db:get_col("test")
-			local sel = {}
-			sel = {name="dog"}
-			local field = {}
-			field['name'] = -1
-            id, results, t = col:query({query=sel,orderby=field},returnfields,0,10);
-            ngx.say(results[1]["name"])
-			
-Example query with regex and order
----------------------------
-            local mongo = require "resty.mongol"
-            conn = mongo:new()
-            conn:set_timeout(1000)
-            ok, err = conn:connect()
-            if not ok then
-                ngx.say("connect failed: "..err)
-            end
+See wiki for advanced examples
 
-            local db = conn:new_db_handle ( "test" )
-            col = db:get_col("test")
-
-			local field = {}
-			field['name'] = -1
-			
-			local regex = {}
-			regex['$regex'] = 'do.*'
-			regex['$options'] = 'i'
-			
-			local sel = {}
-			sel = {name=regex}
-			
-            id, results, t = col:query({query=sel,orderby=field},returnfields,0,10);
-            ngx.say(results[1]["name"])
-
-Example query with or modifier and regex
----------------------------
-			local query_object = {}
-			local or_object = {}
-			local array_of_or_objects = {}
-
-			local title_regex = {}
-			title_regex['$regex'] = '^' .. query_string .. '.*'
-			title_regex['$options'] = 'i'
-
-			local imdb_regex = {}
-			imdb_regex['$regex'] = '^' .. query_string .. '.*'
-			imdb_regex['$options'] = 'i'
-
-			local year_regex = {}
-			year_regex['$regex'] = '^' .. query_string .. '.*'
-			year_regex['$options'] = 'i'
-
-			local title_object = {title=title_regex}
-			local imdb_object = {imdb_id=imdb_regex}
-			local year_object = {year=year_regex}
-
-			array_of_or_objects[1] = title_object
-			array_of_or_objects[2] = imdb_object
-			array_of_or_objects[3] = year_object
-
-			or_object['$or'] = array_of_or_objects
-			query_object['$query'] = query_or
-
-			local returnfields = {id=1,poster_path=1,title=1,popularity=1,vote_average=1,release_date=1}
-			id, results, t = col:query(query_object,returnfields,0,20);
-
-			if not results then
-				ngx.say('No results')
-			end
-			ngx.say(results[1]['title'])
-
-
+ 
 For Test Case
 --------------------
 #####mongo config:
