@@ -168,13 +168,13 @@ end
 function to_bson(ob)
 	-- Find out if ob if an array; string->value map; or general table
 	local onlyarray = true
-	local seen_n , high_n = { } , 0
+	local seen_n , high_n = { } , 1
 	local onlystring = true
 	for k , v in pairs ( ob ) do
 		local t_k = type ( k )
 		onlystring = onlystring and ( t_k == "string" )
 		if onlyarray then
-			if t_k == "number" and k >= 0 then
+			if t_k == "number" and k >= 1 then
 				if k >= high_n then
 					high_n = k
 					seen_n [ k ] = v
@@ -198,12 +198,14 @@ function to_bson(ob)
 		local r = { }
 
 		local low = 0
-		--if seen_n [ 0 ] then low = 0 end
+		--[[
+		mongo array start from 0 and lua from 1
+		]]--
 		for i=low , high_n do
-			r [ i ] = pack ( i , seen_n [ i ] )
+			r [ i ] = pack ( i , seen_n [ i + 1 ] )
 		end
-
-		m = t_concat ( r , "" , low , high_n )
+		local h = high_n - 1
+		m = t_concat ( r , "" , low , h )
 		retarray = true
 	else
 		local ni = 1
