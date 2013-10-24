@@ -212,7 +212,12 @@ function to_bson(ob)
     retarray = true
   else
     local ni = 1
-    local keys, vals = {}, {}
+    local keys, vals
+    if Array then
+      keys, vals = Array(), Array()
+    else
+      keys, vals = {}, {}
+    end
     for k, v in pairs(ob) do
       keys[ni] = k
       vals[ni] = v
