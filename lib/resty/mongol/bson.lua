@@ -34,7 +34,6 @@ local utc_date = {}
 local function read_document(get, numerical)
   local bytes = le_uint_to_num(get(4))
 
-  local ho, hk, hv = false, false, false
   local t = {}
   while true do
     local op = get(1)
@@ -89,24 +88,7 @@ local function read_document(get, numerical)
     else
       t[e_name] = v
     end
-
-    -- Check for special universal map
-    if e_name == "_keys" then
-      hk = v
-    elseif e_name == "_vals" then
-      hv = v
-    else
-      ho = true
-    end
   end
-
-  if not ho and hk and hv then
-    t = {}
-    for i = 1, #hk do
-      t[hk[i]] = hv[i]
-    end
-  end
-
   return t
 end
 
@@ -167,65 +149,46 @@ local function pack(k, v)
 end
 
 function to_bson(ob)
-  -- Find out if ob if an array; string->value map; or general table
-  local onlyarray = true
+  -- Find out if ob if an array; or a table
+  local is_array = true
   local max = 0
-  local onlystring = true
   if Array then
     if getmetatable(ob) == Array then
       max = t_maxn(ob)
-      onlystring = false
     else
-      onlyarray = false
+      is_array = false
     end
-  end
-  if onlystring then
+  else
     for k, v in pairs(ob) do
       local t_k = type(k)
-      onlystring = onlystring and (t_k == "string")
-      if onlyarray then
+      if is_array then
         if t_k == "number" and k >= 1 then
           if k >= max then
             max = k
           end
         else
-          onlyarray = false
+          is_array = false
         end
       end
-      if not onlyarray and not onlystring then break end
+      if not is_array then break end
     end
   end
 
-  local retarray, m = false, nil
-  if onlystring then -- Do string first so the case of an empty table is done properly
-    local r = {}
-    for k, v in pairs(ob) do
-      t_insert(r, pack(k, v))
-    end
-    m = t_concat(r)
-  elseif onlyarray then
+  local m
+  if is_array then
     local r = {}
     for i = 1, max do
       r[i] = pack(i - 1, ob[i])
     end
     m = t_concat(r, "", 1, max)
-    retarray = true
   else
-    local ni = 1
-    local keys, vals
-    if Array then
-      keys, vals = Array(), Array()
-    else
-      keys, vals = {}, {}
-    end
+    local r = {}
     for k, v in pairs(ob) do
-      keys[ni] = k
-      vals[ni] = v
-      ni = ni + 1
+      t_insert(r, pack(tostring(k), v))
     end
-    return to_bson({_keys = keys, _vals = vals})
+    m = t_concat(r)
   end
-  return num_to_le_uint(#m + 4 + 1 )..m.."\0", retarray
+  return num_to_le_uint(#m + 4 + 1 )..m.."\0", is_array
 end
 
 return {
