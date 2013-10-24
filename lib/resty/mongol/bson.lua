@@ -85,7 +85,7 @@ local function read_document(get, numerical)
     end
 
     if numerical then
-      t[tonumber(e_name)] = v
+      t[tonumber(e_name) + 1] = v
     else
       t[e_name] = v
     end
