@@ -16,7 +16,7 @@ local num_to_le_uint = ll.num_to_le_uint
 local num_to_be_uint = ll.num_to_be_uint
 
 local function _tostring(ob)
-  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('*', '/')
+  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('.', '/')
 end
 
 local function _get_ts(ob)
@@ -71,10 +71,11 @@ end
 local function new_object_id(str)
   local id
   if type(str) == 'string' then
-    if #str == 12 then
+    local len = #str
+    if len == 12 then
       id = str
-    elseif #str == 16 then
-      id = ngx_decode_base64(sid:gsub('+', '!'):gsub('/', '*'))
+    elseif len == 16 then
+      id = ngx_decode_base64(sid:gsub('+', '!'):gsub('/', '.'))
     end
   end
   return setmetatable({
