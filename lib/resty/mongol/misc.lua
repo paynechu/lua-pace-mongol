@@ -1,11 +1,10 @@
-local mod_name = (...):match ( "^(.*)%..-$" )
+local mod_name = (...):match("^(.*)%..-$")
 
-local ll = require ( mod_name .. ".ll" )
+local ll = require(mod_name..".ll")
 local num_to_le_uint = ll.num_to_le_uint
 local num_to_le_int = ll.num_to_le_int
 local le_uint_to_num = ll.le_uint_to_num
 local le_bpeek = ll.le_bpeek
-
 
 local getmetatable , setmetatable = getmetatable , setmetatable
 local pairs = pairs

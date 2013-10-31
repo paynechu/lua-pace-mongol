@@ -1,8 +1,8 @@
-local mod_name = (...):match ( "^(.*)%..-$" )
+local mod_name = (...):match( "^(.*)%..-$" )
 
 local md5 = require "resty.md5"
 local str = require "resty.string"
-local bson = require ( mod_name .. ".bson" )
+local bson = require(mod_name..".bson")
 
 local gridfs_file_mt = { }
 local gridfs_file = { __index = gridfs_file_mt }

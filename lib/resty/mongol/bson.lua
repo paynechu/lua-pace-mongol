@@ -22,12 +22,10 @@ local num_to_le_int = ll.num_to_le_int
 local from_double = ll.from_double
 local to_double = ll.to_double
 
-local getlib = require ( mod_name .. ".get" )
+local getlib = require(mod_name..".get")
 local read_terminated_string = getlib.read_terminated_string
 
-local obid = require ( mod_name .. ".object_id" )
-local new_object_id = obid.new
-local object_id_mt = obid.metatable
+local ObjectId = require(mod_name..".ObjectId")
 local binary_mt = {}
 local utc_date = {}
 
@@ -59,7 +57,7 @@ local function read_document(get, numerical)
       local subtype = get(1)
       v = get(len)
     elseif op == "\7" then -- ObjectId
-      v = new_object_id(get(12))
+      v = ObjectId(get(12))
     elseif op == "\8" then -- false
       local f = get(1)
       if f == "\0" then
@@ -129,7 +127,7 @@ local function pack(k, v)
     else
       return "\8" .. k .. "\0\1"
     end
-  elseif mt == object_id_mt then
+  elseif mt == ObjectId then
     return "\7" .. k .. "\0" .. v.id
   elseif mt == utc_date then
     return "\9" .. k .. "\0" .. num_to_le_int(v.v, 8)
