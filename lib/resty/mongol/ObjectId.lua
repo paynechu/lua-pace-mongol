@@ -25,7 +25,7 @@ local num_to_be_uint = ll.num_to_be_uint
 local be_uint_tonum = ll.be_uint_to_num
 
 local function _tostring(ob)
-  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('%.', '/')
+  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('_', '/')
 end
 
 local machineid
@@ -58,7 +58,7 @@ local _new = function(cls, id)
     local len = #id
     assert(len == 12 or len == 16)
     if len == 16 then
-      id = ngx_decode_base64((id:gsub('%+', '!'):gsub('/', '.')))
+      id = ngx_decode_base64((id:gsub('%+', '!'):gsub('/', '_')))
     end
   end
   local o = { id = id or _generate_id() }
