@@ -24,10 +24,6 @@ local num_to_le_uint = ll.num_to_le_uint
 local num_to_be_uint = ll.num_to_be_uint
 local be_uint_tonum = ll.be_uint_to_num
 
-local function _tostring(ob)
-  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('_', '/')
-end
-
 local machineid
 local function _get_os_machineid()
   if hasposix then
@@ -52,7 +48,7 @@ local function _generate_id()
   return num_to_be_uint(os_time(), 4) .. (machineid or _get_os_machineid()) .. (pid or _get_os_pid()) .. num_to_be_uint(inc, 3)
 end
 
-local _new = function(cls, id) 
+local function _new(cls, id) 
   if id then
     if type(id) == 'string' then
       local len = #id
@@ -71,15 +67,19 @@ local _new = function(cls, id)
   return o
 end
 
+setmetatable(_M, { __call = _new })
+
 __index = _M
-__tostring = _tostring
+
+__tostring = function(ob)
+  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('_', '/')
+end
+
 __eq = function (a, b)
   return a.id == b.id
 end
 
-setmetatable(_M, { __call = _new })
-
-tostring = _tostring
+tostring = __tostring
 
 function get_ts(ob)
   return be_uint_to_num(ob.id, 1, 4)
