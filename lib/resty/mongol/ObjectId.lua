@@ -53,12 +53,17 @@ local function _generate_id()
 end
 
 local _new = function(cls, id) 
-  assert(id == nil or type(id) == 'string')
   if id then
-    local len = #id
-    assert(len == 12 or len == 16)
-    if len == 16 then
-      id = ngx_decode_base64((id:gsub('%+', '!'):gsub('/', '_')))
+    if type(id) == 'string' then
+      local len = #id
+      if len == 12 then
+      elseif len == 16 then
+        id = ngx_decode_base64((id:gsub('%+', '!'):gsub('/', '_')))
+      else
+        return nil, 'expecting string is 12 or 16 length'
+      end
+    else
+      return nil, 'expecting id is string or nil'
     end
   end
   local o = { id = id or _generate_id() }
