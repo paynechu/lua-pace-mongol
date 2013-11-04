@@ -54,7 +54,7 @@ local function _new(cls, id)
       local len = #id
       if len == 12 then
       elseif len == 16 then
-        id = ngx_decode_base64((id:gsub('%+', '!'):gsub('/', '_')))
+        id = ngx_decode_base64((id:gsub('!', '+'):gsub('_', '/')))
       else
         return nil, 'expecting string is 12 or 16 length'
       end
@@ -72,7 +72,7 @@ setmetatable(_M, { __call = _new })
 __index = _M
 
 __tostring = function(ob)
-  return ngx_encode_base64(ob.id):gsub('!', '+'):gsub('_', '/')
+  return ngx_encode_base64(ob.id):gsub('%+', '!'):gsub('/', '_')
 end
 
 __eq = function (a, b)
