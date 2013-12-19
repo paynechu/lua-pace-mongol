@@ -75,6 +75,8 @@ __tostring = function(ob)
   return ngx_encode_base64(ob.id):gsub('%+', '!'):gsub('/', '_')
 end
 
+__tojson = __tostring
+
 __eq = function (a, b)
   return a.id == b.id
 end
