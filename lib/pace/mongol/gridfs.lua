@@ -3,6 +3,7 @@ local mod_name = (...):match( "^(.*)%..-$" )
 local md5 = require "resty.md5"
 local str = require "resty.string"
 
+local Date = Date
 local Id = Id
 
 local bson = require(mod_name..".bson")
@@ -11,7 +12,6 @@ local gridfs_file= require(mod_name..".gridfs_file")
 local gridfs_mt = { }
 local gridfs = { __index = gridfs_mt }
 local get_bin_data = bson.get_bin_data
-local get_utc_date = bson.get_utc_date
 
 function gridfs_mt:find_one(fields)
     local r = self.file_col:find_one(fields)
@@ -64,7 +64,7 @@ function gridfs_mt:new(meta)
     meta.filename = meta.filename or meta._id:tostring()
 
     meta.md5 = 0
-    meta.uploadDate = get_utc_date(ngx.time() * 1000)
+    meta.uploadDate = Date()
     meta.length = 0
     local r, err = self.file_col:insert({meta}, nil, true)
     if not r then return nil, err end
@@ -107,7 +107,7 @@ function gridfs_mt:insert(fh, meta, safe)
     local md5hex = str.to_hex(md5_obj:final())
 
     meta.md5 = md5hex
-    meta.uploadDate = get_utc_date(ngx.time() * 1000)
+    meta.uploadDate = Date()
     meta.length = length
     r, err = self.file_col:insert({meta}, nil, safe)
     if safe and not r then return nil, err end

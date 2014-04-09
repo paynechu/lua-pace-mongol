@@ -12,7 +12,9 @@ local strformat = string.format
 local strmatch = string.match
 local strbyte = string.byte
 
+local null = null
 local Array = Array
+local Date = Date
 local Id = Id
 
 local le_uint_to_num = le_uint_to_num
@@ -26,7 +28,6 @@ local getlib = require(mod_name..".get")
 local read_terminated_string = getlib.read_terminated_string
 
 local binary_mt = {}
-local utc_date = {}
 
 local function read_document(get, numerical)
   local bytes = le_uint_to_num(get(4))
@@ -64,9 +65,9 @@ local function read_document(get, numerical)
         error(f:byte())
       end
     elseif op == "\9" then -- UTC datetime milliseconds
-      v = le_uint_to_num(get(8), 1, 8)
+      v = Date(le_uint_to_num(get(8), 1, 8) / 1000)
     elseif op == "\10" then -- Null
-      v = nil
+      v = null
     elseif op == "\16" then --int32
       v = le_int_to_num(get(4), 1, 8)
     elseif op == "\17" then --int64 // timestamp
@@ -86,10 +87,6 @@ local function read_document(get, numerical)
   return t
 end
 
-local function get_utc_date(v)
-  return setmetatable({v = v}, utc_date)
-end
-
 local function get_bin_data(v)
   return setmetatable({v = v, st = "\0"}, binary_mt)
 end
@@ -103,7 +100,11 @@ local function pack(k, v)
   local ot = type(v)
   local mt = getmetatable(v)
 
-  if ot == "number" then
+  if v == nil then
+    return ""
+  elseif v == null or ot == "userdata" then
+    return "\10" .. k .. "\0"
+  elseif ot == "number" then
     if math.floor(v) ~= v then
       return "\1" .. k .. "\0" .. to_double ( v )
     elseif v > 2147483647 or v < -2147483648 then -- 64bit
@@ -111,10 +112,6 @@ local function pack(k, v)
     else -- 32bit
       return "\16" .. k .. "\0" .. num_to_le_int ( v , 4 )
     end
-  elseif ot == "nil" then
-    return "\10" .. k .. "\0"
-  elseif ot == "userdata" then
-    return "\10" .. k .. "\0"
   elseif ot == "string" then
     return "\2" .. k .. "\0" .. num_to_le_uint ( #v + 1 ) .. v .. "\0"
   elseif ot == "boolean" then
@@ -125,8 +122,8 @@ local function pack(k, v)
     end
   elseif mt == Id then
     return "\7" .. k .. "\0" .. v.id
-  elseif mt == utc_date then
-    return "\9" .. k .. "\0" .. num_to_le_int(v.v, 8)
+  elseif mt == Date then
+    return "\9" .. k .. "\0" .. num_to_le_int(v.time * 1000, 8)
   elseif mt == binary_mt then
     return "\5" .. k .. "\0" .. num_to_le_uint(string.len(v.v)) .. 
     v.st .. v.v
@@ -189,5 +186,4 @@ return {
   from_bson = from_bson;
   to_bson = to_bson;
   get_bin_data = get_bin_data;
-  get_utc_date = get_utc_date;
 }
