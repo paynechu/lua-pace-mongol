@@ -8,11 +8,10 @@ local t_insert , t_concat = table.insert , table.concat
 
 local attachpairs_start = misc.attachpairs_start
 
-local ll = require ( mod_name .. ".ll" )
-local num_to_le_uint = ll.num_to_le_uint
-local num_to_le_int = ll.num_to_le_int
-local le_uint_to_num = ll.le_uint_to_num
-local le_bpeek = ll.le_bpeek
+local num_to_le_uint = num_to_le_uint
+local num_to_le_int = num_to_le_int
+local le_uint_to_num = le_uint_to_num
+local le_bpeek = le_bpeek
 
 local getlib = require ( mod_name .. ".get" )
 local get_from_string = getlib.get_from_string

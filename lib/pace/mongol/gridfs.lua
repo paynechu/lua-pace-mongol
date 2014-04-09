@@ -2,8 +2,10 @@ local mod_name = (...):match( "^(.*)%..-$" )
 
 local md5 = require "resty.md5"
 local str = require "resty.string"
+
+local Id = Id
+
 local bson = require(mod_name..".bson")
-local ObjectId = require(mod_name..".ObjectId")
 local gridfs_file= require(mod_name..".gridfs_file")
 
 local gridfs_mt = { }
@@ -57,7 +59,7 @@ end
 
 function gridfs_mt:new(meta)
     meta = meta or {}
-    meta._id = meta._id or ObjectId()
+    meta._id = meta._id or Id()
     meta.chunkSize = meta.chunkSize or 256*1024
     meta.filename = meta.filename or meta._id:tostring()
 
@@ -81,7 +83,7 @@ end
 function gridfs_mt:insert(fh, meta, safe)
     meta = meta or {}
     meta.chunkSize = meta.chunkSize or 256*1024
-    meta._id = meta._id or ObjectId()
+    meta._id = meta._id or Id()
     meta.filename = meta.filename or meta._id:tostring()
 
     local n = 0

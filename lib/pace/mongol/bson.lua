@@ -13,26 +13,25 @@ local strmatch = string.match
 local strbyte = string.byte
 
 local Array = Array
+local Id = Id
 
-local ll = require ( mod_name .. ".ll" )
-local le_uint_to_num = ll.le_uint_to_num
-local le_int_to_num = ll.le_int_to_num
-local num_to_le_uint = ll.num_to_le_uint
-local num_to_le_int = ll.num_to_le_int
-local from_double = ll.from_double
-local to_double = ll.to_double
+local le_uint_to_num = le_uint_to_num
+local le_int_to_num = le_int_to_num
+local num_to_le_uint = num_to_le_uint
+local num_to_le_int = num_to_le_int
+local from_double = from_double
+local to_double = to_double
 
 local getlib = require(mod_name..".get")
 local read_terminated_string = getlib.read_terminated_string
 
-local ObjectId = require(mod_name..".ObjectId")
 local binary_mt = {}
 local utc_date = {}
 
 local function read_document(get, numerical)
   local bytes = le_uint_to_num(get(4))
 
-  local t = {}
+  local t = numerical and Array() or {}
   while true do
     local op = get(1)
     if op == "\0" then break end
@@ -49,15 +48,12 @@ local function read_document(get, numerical)
       v = read_document(get, false)
     elseif op == "\4" then -- Array
       v = read_document(get, true)
-      if Array then
-        v = Array(v)
-      end
     elseif op == "\5" then -- Binary
       local len = le_uint_to_num(get(4))
       local subtype = get(1)
       v = get(len)
-    elseif op == "\7" then -- ObjectId
-      v = ObjectId(get(12))
+    elseif op == "\7" then -- Id
+      v = Id(get(12))
     elseif op == "\8" then -- false
       local f = get(1)
       if f == "\0" then
@@ -127,7 +123,7 @@ local function pack(k, v)
     else
       return "\8" .. k .. "\0\1"
     end
-  elseif mt == ObjectId then
+  elseif mt == Id then
     return "\7" .. k .. "\0" .. v.id
   elseif mt == utc_date then
     return "\9" .. k .. "\0" .. num_to_le_int(v.v, 8)

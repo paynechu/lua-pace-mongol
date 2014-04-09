@@ -1,4 +1,4 @@
-module("resty.mongol", package.seeall)
+module("pace.mongol", package.seeall)
 
 local mod_name = (...)
 
@@ -134,7 +134,7 @@ function new(self)
 end
 
 -- to prevent use of casual module global variables
-getmetatable(resty.mongol).__newindex = function (table, key, val)
+getmetatable(pace.mongol).__newindex = function (table, key, val)
     error('attempt to write to undeclared variable "' .. key .. '": '
             .. debug.traceback())
 end
