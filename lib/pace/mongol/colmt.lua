@@ -12,6 +12,7 @@ local num_to_le_uint = num_to_le_uint
 local num_to_le_int = num_to_le_int
 local le_uint_to_num = le_uint_to_num
 local le_bpeek = le_bpeek
+local null = null
 
 local getlib = require ( mod_name .. ".get" )
 local get_from_string = getlib.get_from_string
@@ -125,7 +126,7 @@ function colmethods:insert(docs, continue_on_error, safe)
             return nil, err
         end
     
-        if r["err"] then
+        if r["err"] and r["err"] ~= null then
             return nil, r["err"]
         else
             return r["n"]
@@ -156,7 +157,7 @@ function colmethods:update(selector, update, upsert, multiupdate, safe)
             return nil, err
         end
     
-        if r["err"] then
+        if r["err"] and r["err"] ~= null then
             return nil, r["err"]
         else
             return r["n"]
@@ -185,7 +186,7 @@ function colmethods:delete(selector, single_remove, safe)
             return nil, err
         end
     
-        if r["err"] then
+        if r["err"] and r["err"] ~= null then
             return nil, r["err"]
         else
             return r["n"]
